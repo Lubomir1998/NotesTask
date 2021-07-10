@@ -7,8 +7,8 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="note_title">#000000</color>
-    <color name="note_text">#9F9F9F</color>
-    <color name="note_background">#F1F1F1</color>
+    <color name="note_title">#FF1F1</color>
+    <color name="note_text">#F4F4F4</color>
+    <color name="note_background">#000000</color>
     <color name="blue">#03B7FC</color>
 </resources>

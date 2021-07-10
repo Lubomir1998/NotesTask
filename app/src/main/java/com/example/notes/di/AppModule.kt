@@ -3,6 +3,9 @@ package com.example.notes.di
 import android.content.Context
 import androidx.room.Room
 import com.example.notes.db.DbHelper
+import com.example.notes.db.NoteDao
+import com.example.notes.repositories.DefaultNoteRepository
+import com.example.notes.repositories.NoteRepository
 import com.example.notes.util.DispatcherProvider
 import dagger.Module
 import dagger.Provides
@@ -16,6 +19,8 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
+
+
 
     @Singleton
     @Provides
@@ -49,5 +54,8 @@ object AppModule {
         }
     }
 
+    @Singleton
+    @Provides
+    fun provideNoteRepo(dao: NoteDao): NoteRepository = DefaultNoteRepository(dao)
 
 }
