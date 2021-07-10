@@ -31,6 +31,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/etSearchNote"
+        android:visibility="gone"
         tools:listitem="@layout/note_item" />
 
     <ImageView
@@ -53,5 +54,17 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         tools:text="3 Notes" />
+
+    <TextView
+        android:id="@+id/tvNoNotes"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="No notes"
+        android:textColor="@color/note_text"
+        android:textSize="28sp"
+        app:layout_constraintBottom_toTopOf="@+id/imageView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/etSearchNote" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

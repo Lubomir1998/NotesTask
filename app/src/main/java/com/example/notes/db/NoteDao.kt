@@ -1,12 +1,10 @@
 package com.example.notes.db
 
 import androidx.lifecycle.LiveData
-import androidx.room.Delete
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
-import androidx.room.Query
+import androidx.room.*
 import com.example.notes.db.models.Note
 
+@Dao
 interface NoteDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -17,6 +15,9 @@ interface NoteDao {
 
     @Query("SELECT * FROM Note")
     fun getNotes(): LiveData<List<Note>>
+
+    @Query("SELECT * FROM Note WHERE LOWER(title) == LOWER(:query)")
+    fun searchNotes(query: String): LiveData<List<Note>>
 
 
 }
