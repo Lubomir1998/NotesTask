@@ -3,6 +3,7 @@ package com.example.notes.ui.fragments
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.View
+import android.view.WindowManager
 import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
@@ -21,6 +22,7 @@ import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -36,8 +38,11 @@ class HomeScreenFragment: Fragment(R.layout.home_screen_fragment) {
         super.onViewCreated(view, savedInstanceState)
         _binding = HomeScreenFragmentBinding.bind(view)
 
+        requireActivity().window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN)
+
         setupRecyclerView()
-        subscribeToObservers()
+        viewModel.getAllNotes()
+        collectNotes()
 
 
         var searchJob: Job? = null
@@ -46,7 +51,6 @@ class HomeScreenFragment: Fragment(R.layout.home_screen_fragment) {
             searchJob = lifecycleScope.launch {
                 delay(SEARCH_DELAY)
                 viewModel.searchNotes(it.toString())
-                subscribeToObservers()
             }
         }
 
@@ -106,21 +110,41 @@ class HomeScreenFragment: Fragment(R.layout.home_screen_fragment) {
 
 
     @SuppressLint("SetTextI18n")
-    private fun subscribeToObservers() {
-        viewModel.notes.observe(viewLifecycleOwner) { notesList ->
-            if(notesList.isNotEmpty()) {
-                binding.rvNotes.isVisible = true
-                binding.tvNoNotes.isVisible = false
-                noteAdapter.submitList(notesList)
-            } else {
-                binding.rvNotes.isVisible = false
-                binding.tvNoNotes.isVisible = true
-            }
+    private fun collectNotes() {
+        lifecycleScope.launchWhenStarted {
+            viewModel.notes.collect { state ->
+                when(state) {
+                    is HomeScreenViewModel.State.Success -> {
+                        binding.progressBar.isVisible = false
 
-            binding.tvAllNotes.text = when (notesList.size) {
-                0 -> "No notes"
-                1 -> "1 Note"
-                else -> "${notesList.size} Notes"
+                        if (state.data.isNotEmpty()) {
+                            binding.rvNotes.isVisible = true
+                            binding.tvNoNotes.isVisible = false
+                            noteAdapter.submitList(state.data)
+                        } else {
+                            binding.rvNotes.isVisible = false
+                            binding.tvNoNotes.isVisible = true
+                        }
+
+                        binding.tvAllNotes.text = when (state.data.size) {
+                            0 -> "No notes"
+                            1 -> "1 Note"
+                            else -> "${state.data.size} Notes"
+                        }
+                    }
+
+                    is HomeScreenViewModel.State.Loading -> {
+                        binding.apply {
+                            progressBar.isVisible = true
+                            rvNotes.isVisible = false
+                            tvNoNotes.isVisible = false
+                            tvAllNotes.text = "Loading..."
+                        }
+                    }
+
+                    else -> Unit
+                }
+
             }
         }
     }

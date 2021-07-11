@@ -9,8 +9,8 @@ interface NoteRepository {
 
     suspend fun deleteNote(note: Note)
 
-    fun getNotes(): LiveData<List<Note>>
+    suspend fun getNotes(): List<Note>
 
-    fun searchNotes(query: String): LiveData<List<Note>>
+    suspend fun searchNotes(query: String): List<Note>
 
 }

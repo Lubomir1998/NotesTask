@@ -27,53 +27,60 @@
             android:layout_marginStart="24dp"
             android:layout_marginTop="16dp"
             android:layout_marginEnd="24dp"
+            android:hint="Title"
+            android:background="@drawable/text_field_style"
+            android:inputType="text"
+            android:textColor="@color/note_title"
             android:textSize="22sp"
             android:textStyle="bold"
-            android:textColor="@color/note_title"
-            android:inputType="text"
-            android:hint="Title"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toBottomOf="@+id/btnSave" />
 
         <EditText
             android:id="@+id/etText"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
             android:layout_marginEnd="16dp"
-            android:textSize="20sp"
-            android:textColor="@color/note_text"
-            android:inputType="text"
+            android:layout_marginBottom="16dp"
             android:hint="Content"
+            android:inputType="text"
+            android:textColor="@color/note_text"
+            android:textSize="20sp"
+            android:gravity="top|start"
+            android:background="@drawable/text_field_style"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/ivNoteImage" />
+            app:layout_constraintTop_toBottomOf="@+id/btnChoosePic" />
 
         <ImageView
             android:id="@+id/btnChoosePic"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="12dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/etText"
+            app:layout_constraintTop_toBottomOf="@+id/ivNoteImage"
             app:srcCompat="@drawable/ic_baseline_camera_alt_24" />
 
         <Button
             android:id="@+id/btnSave"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="Save"
-            android:textSize="22sp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
             android:backgroundTint="@color/blue"
-            android:paddingStart="44dp"
-            android:paddingEnd="44dp"
+            android:paddingStart="34dp"
+            android:paddingEnd="34dp"
+            android:text="done"
+            android:visibility="gone"
+            android:textSize="16sp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/btnChoosePic" />
+            app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

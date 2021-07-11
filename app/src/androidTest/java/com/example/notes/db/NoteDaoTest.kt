@@ -6,7 +6,6 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.example.notes.db.models.Note
-import com.example.notes.getOrAwaitValue
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runBlockingTest
@@ -54,7 +53,7 @@ class NoteDaoTest {
         dao.saveNote(note2)
         dao.saveNote(note3)
 
-        val notes = dao.getNotes().getOrAwaitValue()
+        val notes = dao.getNotes()
 
         assertThat(notes.size).isEqualTo(3)
     }
@@ -73,7 +72,7 @@ class NoteDaoTest {
         dao.deleteNote(note2)
         dao.deleteNote(note3)
 
-        val notes = dao.getNotes().getOrAwaitValue()
+        val notes = dao.getNotes()
 
         assertThat(notes).isEmpty()
     }
@@ -88,7 +87,7 @@ class NoteDaoTest {
         dao.saveNote(note2)
         dao.saveNote(note3)
 
-        val notes = dao.getNotes().getOrAwaitValue()
+        val notes = dao.getNotes()
 
         assertThat(notes.size).isEqualTo(2)
     }
@@ -104,7 +103,7 @@ class NoteDaoTest {
         dao.saveNote(note2)
         dao.saveNote(note3)
 
-        val notes = dao.searchNotes("T").getOrAwaitValue()
+        val notes = dao.searchNotes("T")
 
         assertThat(notes.size).isEqualTo(2)
 

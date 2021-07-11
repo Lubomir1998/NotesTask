@@ -1,6 +1,5 @@
 package com.example.notes.db
 
-import androidx.lifecycle.LiveData
 import androidx.room.*
 import com.example.notes.db.models.Note
 
@@ -14,10 +13,10 @@ interface NoteDao {
     suspend fun deleteNote(note: Note)
 
     @Query("SELECT * FROM Note ORDER BY timestamp DESC")
-    fun getNotes(): LiveData<List<Note>>
+    suspend fun getNotes(): List<Note>
 
     @Query("SELECT * FROM Note WHERE LOWER(title) LIKE '%' || LOWER(:query) || '%'")
-    fun searchNotes(query: String): LiveData<List<Note>>
+    suspend fun searchNotes(query: String): List<Note>
 
 
 }

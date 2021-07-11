@@ -1,6 +1,5 @@
 package com.example.notes.repositories
 
-import androidx.lifecycle.LiveData
 import com.example.notes.db.NoteDao
 import com.example.notes.db.models.Note
 import javax.inject.Inject
@@ -17,11 +16,11 @@ class DefaultNoteRepository @Inject constructor(
         dao.deleteNote(note)
     }
 
-    override fun getNotes(): LiveData<List<Note>> {
+    override suspend fun getNotes(): List<Note> {
         return dao.getNotes()
     }
 
-    override fun searchNotes(query: String): LiveData<List<Note>> {
+    override suspend fun searchNotes(query: String): List<Note> {
         return dao.searchNotes(query)
     }
 }

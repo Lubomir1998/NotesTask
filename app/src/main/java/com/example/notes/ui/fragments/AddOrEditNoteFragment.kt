@@ -2,6 +2,8 @@ package com.example.notes.ui.fragments
 
 import android.os.Bundle
 import android.view.View
+import androidx.core.view.isVisible
+import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
@@ -30,8 +32,16 @@ class AddOrEditNoteFragment: Fragment(R.layout.add_or_edit_note_fragment) {
 
         setTextFields(args.title, args.text)
 
+        binding.btnSave.isVisible = binding.etTitle.text.trim().toString().isNotEmpty()
+
+        binding.etTitle.addTextChangedListener {
+            binding.btnSave.isVisible = binding.etTitle.text.trim().toString().isNotEmpty()
+        }
+
         binding.btnSave.setOnClickListener {
             val title = binding.etTitle.text.trim().toString()
+
+            // should never happen but just to validate
             if(title.isEmpty()) {
                 Snackbar.make(requireView(), "Empty title", Snackbar.LENGTH_LONG).show()
                 return@setOnClickListener
