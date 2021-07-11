@@ -18,6 +18,8 @@ import com.example.notes.adapters.NoteAdapter
 import com.example.notes.databinding.HomeScreenFragmentBinding
 import com.example.notes.ui.viewmodels.HomeScreenViewModel
 import com.example.notes.util.Constants.SEARCH_DELAY
+import com.example.notes.util.SaveNoteState
+import com.example.notes.util.snackbar
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Job
@@ -42,7 +44,10 @@ class HomeScreenFragment: Fragment(R.layout.home_screen_fragment) {
 
         setupRecyclerView()
         viewModel.getAllNotes()
+
         collectNotes()
+        collectSaveNoteState()
+        collectDeleteState()
 
 
         var searchJob: Job? = null
@@ -99,12 +104,6 @@ class HomeScreenFragment: Fragment(R.layout.home_screen_fragment) {
             val position = viewHolder.layoutPosition
             val note = noteAdapter.currentList[position]
             viewModel.deleteNote(note)
-
-            Snackbar.make(requireView(), "Note deleted", Snackbar.LENGTH_LONG)
-                .setAction("Undo") {
-                    viewModel.saveNote(note)
-                }
-                .show()
         }
     }
 
@@ -114,7 +113,7 @@ class HomeScreenFragment: Fragment(R.layout.home_screen_fragment) {
         lifecycleScope.launchWhenStarted {
             viewModel.notes.collect { state ->
                 when(state) {
-                    is HomeScreenViewModel.State.Success -> {
+                    is HomeScreenViewModel.NotesState.Success -> {
                         binding.progressBar.isVisible = false
 
                         if (state.data.isNotEmpty()) {
@@ -133,7 +132,7 @@ class HomeScreenFragment: Fragment(R.layout.home_screen_fragment) {
                         }
                     }
 
-                    is HomeScreenViewModel.State.Loading -> {
+                    is HomeScreenViewModel.NotesState.Loading -> {
                         binding.apply {
                             progressBar.isVisible = true
                             rvNotes.isVisible = false
@@ -145,6 +144,49 @@ class HomeScreenFragment: Fragment(R.layout.home_screen_fragment) {
                     else -> Unit
                 }
 
+            }
+        }
+    }
+
+    private fun collectSaveNoteState() {
+        lifecycleScope.launchWhenStarted {
+            viewModel.saveNoteStatus.collect { state ->
+                when(state) {
+                    is SaveNoteState.Success -> {
+                        viewModel.getAllNotes()
+                    }
+
+                    is SaveNoteState.Error -> {
+                        snackbar(state.message)
+                    }
+
+                    else -> Unit
+                }
+            }
+        }
+    }
+
+    private fun collectDeleteState() {
+        lifecycleScope.launchWhenStarted {
+            viewModel.deleteNoteStatus.collect { state ->
+                when(state) {
+                    is HomeScreenViewModel.DeleteNoteState.Success -> {
+                        viewModel.getAllNotes()
+
+                        Snackbar.make(requireView(), "Note deleted", Snackbar.LENGTH_LONG)
+                            .setAction("Undo") {
+                                viewModel.saveNote(state.note)
+                            }
+                            .show()
+
+                    }
+
+                    is HomeScreenViewModel.DeleteNoteState.Error -> {
+                        snackbar(state.message)
+                    }
+
+                    else -> Unit
+                }
             }
         }
     }

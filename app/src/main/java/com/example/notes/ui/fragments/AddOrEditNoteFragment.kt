@@ -6,14 +6,18 @@ import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.example.notes.R
 import com.example.notes.databinding.AddOrEditNoteFragmentBinding
 import com.example.notes.db.models.Note
 import com.example.notes.ui.viewmodels.AddOrEditViewModel
+import com.example.notes.util.SaveNoteState
+import com.example.notes.util.snackbar
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collect
 import java.util.*
 
 @AndroidEntryPoint
@@ -31,6 +35,7 @@ class AddOrEditNoteFragment: Fragment(R.layout.add_or_edit_note_fragment) {
 
 
         setTextFields(args.title, args.text)
+        collectSaveNoteStatus()
 
         binding.btnSave.isVisible = binding.etTitle.text.trim().toString().isNotEmpty()
 
@@ -43,7 +48,7 @@ class AddOrEditNoteFragment: Fragment(R.layout.add_or_edit_note_fragment) {
 
             // should never happen but just to validate
             if(title.isEmpty()) {
-                Snackbar.make(requireView(), "Empty title", Snackbar.LENGTH_LONG).show()
+                snackbar("Empty title")
                 return@setOnClickListener
             }
 
@@ -64,12 +69,28 @@ class AddOrEditNoteFragment: Fragment(R.layout.add_or_edit_note_fragment) {
 
             val note = Note(title, text, timestamp, id)
             viewModel.saveNote(note)
-            findNavController().navigate(AddOrEditNoteFragmentDirections.actionAddOrEditNoteFragmentToHomeScreenFragment())
         }
 
     }
 
 
+    private fun collectSaveNoteStatus() {
+        lifecycleScope.launchWhenStarted {
+            viewModel.saveNoteStatus.collect { state ->
+                when(state) {
+                    is SaveNoteState.Success -> {
+                        findNavController().popBackStack()
+                    }
+
+                    is SaveNoteState.Error -> {
+                        snackbar(state.message)
+                    }
+
+                    else -> Unit
+                }
+            }
+        }
+    }
 
     private fun setTextFields(title: String, text: String? = null) {
         binding.etTitle.setText(title)

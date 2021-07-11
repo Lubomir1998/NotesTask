@@ -6,7 +6,6 @@ import com.example.notes.db.DbHelper
 import com.example.notes.db.NoteDao
 import com.example.notes.repositories.DefaultNoteRepository
 import com.example.notes.repositories.NoteRepository
-import com.example.notes.util.DispatcherProvider
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -37,22 +36,9 @@ object AppModule {
     @Provides
     fun provideDao(db: DbHelper) = db.getDao()
 
-
     @Singleton
     @Provides
-    fun provideDispatcherProvider(): DispatcherProvider {
-        return object : DispatcherProvider {
-
-            override val main: CoroutineDispatcher
-                get() = Dispatchers.Main
-
-            override val io: CoroutineDispatcher
-                get() = Dispatchers.IO
-
-            override val default: CoroutineDispatcher
-                get() = Dispatchers.Default
-        }
-    }
+    fun provideMainDispatcher() = Dispatchers.Main as CoroutineDispatcher
 
     @Singleton
     @Provides

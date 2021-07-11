@@ -26,9 +26,6 @@
             android:name="text"
             app:argType="string"
             app:nullable="true" />
-        <action
-            android:id="@+id/action_addOrEditNoteFragment_to_homeScreenFragment"
-            app:destination="@id/homeScreenFragment" />
         <argument
             android:name="date"
             app:argType="long"
