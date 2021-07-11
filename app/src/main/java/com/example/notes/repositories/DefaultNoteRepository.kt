@@ -20,4 +20,8 @@ class DefaultNoteRepository @Inject constructor(
     override fun getNotes(): LiveData<List<Note>> {
         return dao.getNotes()
     }
+
+    override fun searchNotes(query: String): LiveData<List<Note>> {
+        return dao.searchNotes(query)
+    }
 }

@@ -16,10 +16,22 @@
         android:name="com.example.notes.ui.fragments.AddOrEditNoteFragment"
         android:label="AddOrEditNoteFragment">
         <argument
+            android:name="id"
+            app:argType="string"/>
+        <argument
             android:name="title"
-            app:argType="string" />
+            app:argType="string"
+            android:defaultValue=""/>
         <argument
             android:name="text"
-            app:argType="string" />
+            app:argType="string"
+            app:nullable="true" />
+        <action
+            android:id="@+id/action_addOrEditNoteFragment_to_homeScreenFragment"
+            app:destination="@id/homeScreenFragment" />
+        <argument
+            android:name="date"
+            app:argType="long"
+            android:defaultValue="0L" />
     </fragment>
 </navigation>

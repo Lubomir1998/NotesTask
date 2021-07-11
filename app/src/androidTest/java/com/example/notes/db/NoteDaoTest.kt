@@ -104,9 +104,9 @@ class NoteDaoTest {
         dao.saveNote(note2)
         dao.saveNote(note3)
 
-        val notes = dao.searchNotes("ASD").getOrAwaitValue()
+        val notes = dao.searchNotes("T").getOrAwaitValue()
 
-        assertThat(notes.size).isEqualTo(1)
+        assertThat(notes.size).isEqualTo(2)
 
     }
 

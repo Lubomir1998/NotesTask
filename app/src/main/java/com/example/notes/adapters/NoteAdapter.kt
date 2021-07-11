@@ -28,10 +28,22 @@ class NoteAdapter: ListAdapter<Note, NoteAdapter.NoteViewHolder>(NoteDiffCallBac
         holder.apply {
             tvTitle.text = note.title
             tvDate.text = formatDate(note.timestamp)
+
+            itemView.setOnClickListener {
+                onNoteClickListener?.let { click ->
+                    click(note)
+                }
+            }
         }
 
     }
 
+
+    private var onNoteClickListener: ((Note) -> Unit)? = null
+
+    fun setOnNoteClickListener(listener: ((Note) -> Unit)) {
+        onNoteClickListener = listener
+    }
 
 
     class NoteDiffCallBack: DiffUtil.ItemCallback<Note>() {

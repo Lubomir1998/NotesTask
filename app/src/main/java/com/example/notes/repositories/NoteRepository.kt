@@ -11,4 +11,6 @@ interface NoteRepository {
 
     fun getNotes(): LiveData<List<Note>>
 
+    fun searchNotes(query: String): LiveData<List<Note>>
+
 }

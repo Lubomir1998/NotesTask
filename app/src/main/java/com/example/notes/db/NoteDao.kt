@@ -13,10 +13,10 @@ interface NoteDao {
     @Delete
     suspend fun deleteNote(note: Note)
 
-    @Query("SELECT * FROM Note")
+    @Query("SELECT * FROM Note ORDER BY timestamp DESC")
     fun getNotes(): LiveData<List<Note>>
 
-    @Query("SELECT * FROM Note WHERE LOWER(title) == LOWER(:query)")
+    @Query("SELECT * FROM Note WHERE LOWER(title) LIKE '%' || LOWER(:query) || '%'")
     fun searchNotes(query: String): LiveData<List<Note>>
 
 

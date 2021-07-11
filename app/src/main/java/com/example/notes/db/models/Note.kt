@@ -7,8 +7,8 @@ import java.util.*
 @Entity
 data class Note(
     val title: String,
-    var text: String,
-    val timestamp: Long = System.currentTimeMillis(),
+    val text: String,
+    val timestamp: Long,
     @PrimaryKey
     val id: String = UUID.randomUUID().toString()
 )
