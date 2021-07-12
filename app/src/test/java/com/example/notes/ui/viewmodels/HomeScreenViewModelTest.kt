@@ -4,6 +4,7 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.example.notes.MainCoroutineRule
 import com.example.notes.db.models.Note
 import com.example.notes.repositories.FakeNoteRepository
+import com.example.notes.util.SaveNoteState
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.TestCoroutineDispatcher
@@ -33,7 +34,9 @@ class HomeScreenViewModelTest {
         val note1 = Note("title", "text", 342L)
         viewModel.saveNote(note1)
 
+        val state = viewModel.saveNoteStatus.value
 
+        assertThat(state).isEqualTo(SaveNoteState.Success())
     }
 
 

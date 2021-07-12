@@ -125,11 +125,7 @@ class HomeScreenFragment: Fragment(R.layout.home_screen_fragment) {
                             binding.tvNoNotes.isVisible = true
                         }
 
-                        binding.tvAllNotes.text = when (state.data.size) {
-                            0 -> "No notes"
-                            1 -> "1 Note"
-                            else -> "${state.data.size} Notes"
-                        }
+                        binding.tvAllNotes.text = setBottomViewText(state.data.size)
                     }
 
                     is HomeScreenViewModel.NotesState.Loading -> {
@@ -153,7 +149,13 @@ class HomeScreenFragment: Fragment(R.layout.home_screen_fragment) {
             viewModel.saveNoteStatus.collect { state ->
                 when(state) {
                     is SaveNoteState.Success -> {
-                        viewModel.getAllNotes()
+                        noteAdapter.submitList(state.notes)
+
+                        binding.apply {
+                            tvAllNotes.text = setBottomViewText(state.notes.size)
+                            tvNoNotes.isVisible = state.notes.isEmpty()
+                            rvNotes.isVisible = state.notes.isNotEmpty()
+                        }
                     }
 
                     is SaveNoteState.Error -> {
@@ -171,7 +173,13 @@ class HomeScreenFragment: Fragment(R.layout.home_screen_fragment) {
             viewModel.deleteNoteStatus.collect { state ->
                 when(state) {
                     is HomeScreenViewModel.DeleteNoteState.Success -> {
-                        viewModel.getAllNotes()
+                        noteAdapter.submitList(state.notes)
+
+                        binding.apply {
+                            tvAllNotes.text = setBottomViewText(state.notes.size)
+                            tvNoNotes.isVisible = state.notes.isEmpty()
+                            rvNotes.isVisible = state.notes.isNotEmpty()
+                        }
 
                         Snackbar.make(requireView(), "Note deleted", Snackbar.LENGTH_LONG)
                             .setAction("Undo") {
@@ -188,6 +196,14 @@ class HomeScreenFragment: Fragment(R.layout.home_screen_fragment) {
                     else -> Unit
                 }
             }
+        }
+    }
+
+    private fun setBottomViewText(listSize: Int): String {
+        return when (listSize) {
+            0 -> "No notes"
+            1 -> "1 Note"
+            else -> "$listSize Notes"
         }
     }
 

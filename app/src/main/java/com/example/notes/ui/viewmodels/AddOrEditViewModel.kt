@@ -27,7 +27,7 @@ class AddOrEditViewModel @Inject constructor(
         _saveNoteStatus.value = SaveNoteState.Loading
         viewModelScope.launch(dispatcher) {
             repository.saveNote(note)
-            _saveNoteStatus.value = SaveNoteState.Success
+            _saveNoteStatus.value = SaveNoteState.Success()
         }
     }
 

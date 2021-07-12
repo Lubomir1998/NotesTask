@@ -34,7 +34,7 @@ class HomeScreenViewModel @Inject constructor(
         viewModelScope.launch(dispatcher) {
             _deleteNoteStatus.emit(DeleteNoteState.Loading)
             repository.deleteNote(note)
-            _deleteNoteStatus.emit(DeleteNoteState.Success(note))
+            _deleteNoteStatus.emit(DeleteNoteState.Success(note, repository.getNotes()))
         }
     }
 
@@ -42,7 +42,7 @@ class HomeScreenViewModel @Inject constructor(
         _saveNoteStatus.value = SaveNoteState.Loading
         viewModelScope.launch(dispatcher) {
             repository.saveNote(note)
-            _saveNoteStatus.value = SaveNoteState.Success
+            _saveNoteStatus.value = SaveNoteState.Success(repository.getNotes())
         }
     }
 
@@ -73,7 +73,7 @@ class HomeScreenViewModel @Inject constructor(
 
 
     sealed class DeleteNoteState {
-        data class Success(val note: Note): DeleteNoteState()
+        data class Success(val note: Note, val notes: List<Note>): DeleteNoteState()
         data class Error(val message: String = "Something went wrong"): DeleteNoteState()
         object Loading: DeleteNoteState()
     }
