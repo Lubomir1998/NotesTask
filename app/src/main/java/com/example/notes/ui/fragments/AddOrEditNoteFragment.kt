@@ -1,7 +1,12 @@
 package com.example.notes.ui.fragments
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.net.toUri
 import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
@@ -15,10 +20,11 @@ import com.example.notes.db.models.Note
 import com.example.notes.ui.viewmodels.AddOrEditViewModel
 import com.example.notes.util.SaveNoteState
 import com.example.notes.util.snackbar
-import com.google.android.material.snackbar.Snackbar
+import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
 import java.util.*
+
 
 @AndroidEntryPoint
 class AddOrEditNoteFragment: Fragment(R.layout.add_or_edit_note_fragment) {
@@ -29,15 +35,39 @@ class AddOrEditNoteFragment: Fragment(R.layout.add_or_edit_note_fragment) {
     private val viewModel: AddOrEditViewModel by viewModels()
     private val args: AddOrEditNoteFragmentArgs by navArgs()
 
+    private lateinit var getContent: ActivityResultLauncher<Array<out String>>
+    private var currentUri: Uri? = null
+    private var currentNote: Note? = null
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        getContent = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri: Uri? ->
+            uri?.let {
+                viewModel.setImgUri(it)
+            }
+        }
+
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = AddOrEditNoteFragmentBinding.bind(view)
 
 
         setTextFields(args.title, args.text)
+        setCurrentNote()
+
+        args.imgUri?.let {
+            currentUri = Uri.parse(it)
+            binding.ivNoteImage.setImageURI(currentUri)
+        }
+
         collectSaveNoteStatus()
 
         binding.btnSave.isVisible = binding.etTitle.text.trim().toString().isNotEmpty()
+
+        binding.ivNoteImage.isVisible = currentUri != null
 
         binding.etTitle.addTextChangedListener {
             binding.btnSave.isVisible = binding.etTitle.text.trim().toString().isNotEmpty()
@@ -45,13 +75,6 @@ class AddOrEditNoteFragment: Fragment(R.layout.add_or_edit_note_fragment) {
 
         binding.btnSave.setOnClickListener {
             val title = binding.etTitle.text.trim().toString()
-
-            // should never happen but just to validate
-            if(title.isEmpty()) {
-                snackbar("Empty title")
-                return@setOnClickListener
-            }
-
             val text = binding.etText.text.trim().toString()
 
             val timestamp = if(args.date != 0L) {
@@ -67,12 +90,38 @@ class AddOrEditNoteFragment: Fragment(R.layout.add_or_edit_note_fragment) {
             }
 
 
-            val note = Note(title, text, timestamp, id)
-            viewModel.saveNote(note)
+            val note = Note(title, text, timestamp, currentUri?.toString(), id = id)
+            viewModel.saveNote(title, note)
+        }
+
+        binding.btnChoosePic.setOnClickListener {
+            getContent.launch(arrayOf("image/*"))
+        }
+
+        collectImgUri()
+
+        binding.btnShare.setOnClickListener {
+            shareNote()
         }
 
     }
 
+
+
+
+    private fun shareNote() {
+        currentNote?.let {
+            val share = Intent.createChooser(Intent().apply {
+                action = Intent.ACTION_SEND
+                val json = Gson().toJson(it)
+                putExtra("key", json)
+                flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+                type = "text/plain"
+            }, null)
+            startActivity(share)
+        } ?: snackbar("Note has not been saved")
+
+    }
 
     private fun collectSaveNoteStatus() {
         lifecycleScope.launchWhenStarted {
@@ -92,10 +141,27 @@ class AddOrEditNoteFragment: Fragment(R.layout.add_or_edit_note_fragment) {
         }
     }
 
+    private fun collectImgUri() {
+        lifecycleScope.launchWhenStarted {
+            viewModel.imgUri.collect {
+                it?.let { uri ->
+                    currentUri = uri
+                    binding.ivNoteImage.setImageURI(currentUri!!)
+                }
+            }
+        }
+    }
+
     private fun setTextFields(title: String, text: String? = null) {
         binding.etTitle.setText(title)
         text?.let {
             binding.etText.setText(it)
+        }
+    }
+
+    private fun setCurrentNote() {
+        if(args.id.isNotEmpty()) {
+            currentNote = Note(args.title, args.text ?: "", args.date, args.imgUri, args.id)
         }
     }
 

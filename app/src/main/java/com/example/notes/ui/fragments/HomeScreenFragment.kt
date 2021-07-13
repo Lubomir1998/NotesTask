@@ -64,7 +64,8 @@ class HomeScreenFragment: Fragment(R.layout.home_screen_fragment) {
             findNavController().navigate(
                 HomeScreenFragmentDirections.actionHomeScreenFragmentToAddOrEditNoteFragment(
                     id = "",
-                    text = null
+                    text = null,
+                    imgUri = null
                 )
             )
         }
@@ -76,7 +77,8 @@ class HomeScreenFragment: Fragment(R.layout.home_screen_fragment) {
                     note.id,
                     note.title,
                     note.text,
-                    note.timestamp
+                    note.timestamp,
+                    note.imgUri
                 )
             )
         }

@@ -1,5 +1,6 @@
 package com.example.notes.ui.viewmodels
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.notes.db.models.Note
@@ -23,12 +24,24 @@ class AddOrEditViewModel @Inject constructor(
     val saveNoteStatus: StateFlow<SaveNoteState> = _saveNoteStatus
 
 
-    fun saveNote(note: Note) {
+    fun saveNote(title: String, note: Note) {
         _saveNoteStatus.value = SaveNoteState.Loading
+        if(title.isEmpty()) {
+            _saveNoteStatus.value = SaveNoteState.Error("Empty title")
+            return
+        }
         viewModelScope.launch(dispatcher) {
             repository.saveNote(note)
             _saveNoteStatus.value = SaveNoteState.Success()
         }
+    }
+
+
+    private val _imgUri: MutableStateFlow<Uri?> = MutableStateFlow(null)
+    val imgUri: StateFlow<Uri?> = _imgUri
+
+    fun setImgUri(uri: Uri) {
+        _imgUri.value = uri
     }
 
 
