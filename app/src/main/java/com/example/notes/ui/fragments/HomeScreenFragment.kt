@@ -84,8 +84,6 @@ class HomeScreenFragment: Fragment(R.layout.home_screen_fragment) {
         }
 
 
-
-
     }
 
 

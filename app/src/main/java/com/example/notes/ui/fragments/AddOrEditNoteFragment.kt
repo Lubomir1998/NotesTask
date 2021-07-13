@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.view.View
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.net.toUri
 import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
@@ -110,13 +109,15 @@ class AddOrEditNoteFragment: Fragment(R.layout.add_or_edit_note_fragment) {
 
 
     private fun shareNote() {
-        currentNote?.let {
+        currentNote?.let { note ->
             val share = Intent.createChooser(Intent().apply {
                 action = Intent.ACTION_SEND
-                val json = Gson().toJson(it)
-                putExtra("key", json)
+//                val json = Gson().toJson(note)
+                if(note.imgUri != null) {
+                    putExtra(Intent.EXTRA_STREAM, Uri.parse(note.imgUri))
+                }
                 flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
-                type = "text/plain"
+                type = "image/*"
             }, null)
             startActivity(share)
         } ?: snackbar("Note has not been saved")
@@ -146,7 +147,10 @@ class AddOrEditNoteFragment: Fragment(R.layout.add_or_edit_note_fragment) {
             viewModel.imgUri.collect {
                 it?.let { uri ->
                     currentUri = uri
-                    binding.ivNoteImage.setImageURI(currentUri!!)
+                    binding.ivNoteImage.apply {
+                        isVisible = true
+                        setImageURI(currentUri!!)
+                    }
                 }
             }
         }
