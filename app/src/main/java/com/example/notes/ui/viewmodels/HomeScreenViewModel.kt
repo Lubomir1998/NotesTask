@@ -54,7 +54,6 @@ class HomeScreenViewModel @Inject constructor(
     }
 
     fun searchNotes(query: String) {
-        _notes.value = NotesState.Loading
         viewModelScope.launch(dispatcher) {
             _notes.value = if(query.trim().isEmpty()) {
                 NotesState.Success(repository.getNotes())

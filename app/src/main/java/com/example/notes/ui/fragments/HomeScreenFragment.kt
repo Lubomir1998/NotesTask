@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.View
 import android.view.WindowManager
+import androidx.activity.OnBackPressedCallback
 import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
@@ -84,6 +85,13 @@ class HomeScreenFragment: Fragment(R.layout.home_screen_fragment) {
         }
 
 
+
+        requireActivity().onBackPressedDispatcher.addCallback(object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                requireActivity().finish()
+            }
+        })
+
     }
 
 
@@ -156,6 +164,7 @@ class HomeScreenFragment: Fragment(R.layout.home_screen_fragment) {
                             tvNoNotes.isVisible = state.notes.isEmpty()
                             rvNotes.isVisible = state.notes.isNotEmpty()
                         }
+                        snackbar("Note saved")
                     }
 
                     is SaveNoteState.Error -> {

@@ -9,7 +9,12 @@
         android:label="HomeScreenFragment" >
         <action
             android:id="@+id/action_homeScreenFragment_to_addOrEditNoteFragment"
-            app:destination="@id/addOrEditNoteFragment" />
+            app:destination="@id/addOrEditNoteFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right"/>
+
     </fragment>
     <fragment
         android:id="@+id/addOrEditNoteFragment"
@@ -34,5 +39,12 @@
             android:name="imgUri"
             app:argType="string"
             app:nullable="true" />
+        <action
+            android:id="@+id/action_addOrEditNoteFragment_to_homeScreenFragment"
+            app:destination="@id/homeScreenFragment"
+            app:enterAnim="@anim/slide_in_left"
+            app:exitAnim="@anim/slide_out_right"
+            app:popEnterAnim="@anim/slide_in_right"
+            app:popExitAnim="@anim/slide_out_left"/>
     </fragment>
 </navigation>

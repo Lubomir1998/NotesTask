@@ -4,6 +4,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.isVisible
@@ -18,6 +19,7 @@ import com.example.notes.databinding.AddOrEditNoteFragmentBinding
 import com.example.notes.db.models.Note
 import com.example.notes.ui.viewmodels.AddOrEditViewModel
 import com.example.notes.util.SaveNoteState
+import com.example.notes.util.hideKeyboard
 import com.example.notes.util.snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
@@ -80,6 +82,7 @@ class AddOrEditNoteFragment: Fragment(R.layout.add_or_edit_note_fragment) {
         }
 
         binding.btnSave.setOnClickListener {
+            requireActivity().hideKeyboard(requireView())
             val title = binding.etTitle.text.trim().toString()
             val text = binding.etText.text.trim().toString()
 
@@ -110,6 +113,13 @@ class AddOrEditNoteFragment: Fragment(R.layout.add_or_edit_note_fragment) {
             shareNoteImage()
         }
 
+
+        requireActivity().onBackPressedDispatcher.addCallback(object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                findNavController().navigate(R.id.action_addOrEditNoteFragment_to_homeScreenFragment)
+            }
+        })
+
     }
 
 
@@ -133,7 +143,8 @@ class AddOrEditNoteFragment: Fragment(R.layout.add_or_edit_note_fragment) {
             viewModel.saveNoteStatus.collect { state ->
                 when(state) {
                     is SaveNoteState.Success -> {
-                        findNavController().popBackStack()
+                        findNavController().navigate(R.id.action_addOrEditNoteFragment_to_homeScreenFragment)
+                        snackbar("Note saved")
                     }
 
                     is SaveNoteState.Error -> {
