@@ -19,7 +19,6 @@ import com.example.notes.db.models.Note
 import com.example.notes.ui.viewmodels.AddOrEditViewModel
 import com.example.notes.util.SaveNoteState
 import com.example.notes.util.snackbar
-import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
 import java.util.*
@@ -112,10 +111,11 @@ class AddOrEditNoteFragment: Fragment(R.layout.add_or_edit_note_fragment) {
         currentNote?.let { note ->
             val share = Intent.createChooser(Intent().apply {
                 action = Intent.ACTION_SEND
-//                val json = Gson().toJson(note)
-                if(note.imgUri != null) {
-                    putExtra(Intent.EXTRA_STREAM, Uri.parse(note.imgUri))
+                if(note.imgUri == null) {
+                    snackbar("No image")
+                    return
                 }
+                putExtra(Intent.EXTRA_STREAM, Uri.parse(note.imgUri))
                 flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
                 type = "image/*"
             }, null)
