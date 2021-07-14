@@ -66,6 +66,14 @@ class AddOrEditNoteFragment: Fragment(R.layout.add_or_edit_note_fragment) {
         binding.btnSave.isVisible = binding.etTitle.text.trim().toString().isNotEmpty()
 
         binding.ivNoteImage.isVisible = currentUri != null
+        binding.btnRemoveImg.isVisible = currentUri != null
+
+
+        binding.btnRemoveImg.setOnClickListener {
+            currentUri = null
+            binding.ivNoteImage.isVisible = false
+            binding.btnRemoveImg.isVisible = false
+        }
 
         binding.etTitle.addTextChangedListener {
             binding.btnSave.isVisible = binding.etTitle.text.trim().toString().isNotEmpty()
@@ -99,7 +107,7 @@ class AddOrEditNoteFragment: Fragment(R.layout.add_or_edit_note_fragment) {
         collectImgUri()
 
         binding.btnShare.setOnClickListener {
-            shareNote()
+            shareNoteImage()
         }
 
     }
@@ -107,20 +115,16 @@ class AddOrEditNoteFragment: Fragment(R.layout.add_or_edit_note_fragment) {
 
 
 
-    private fun shareNote() {
-        currentNote?.let { note ->
+    private fun shareNoteImage() {
+        currentUri?.let { uri ->
             val share = Intent.createChooser(Intent().apply {
                 action = Intent.ACTION_SEND
-                if(note.imgUri == null) {
-                    snackbar("No image")
-                    return
-                }
-                putExtra(Intent.EXTRA_STREAM, Uri.parse(note.imgUri))
+                putExtra(Intent.EXTRA_STREAM, uri)
                 flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
                 type = "image/*"
             }, null)
             startActivity(share)
-        } ?: snackbar("Note has not been saved")
+        } ?: snackbar("No image")
 
     }
 
@@ -151,6 +155,7 @@ class AddOrEditNoteFragment: Fragment(R.layout.add_or_edit_note_fragment) {
                         isVisible = true
                         setImageURI(currentUri!!)
                     }
+                    binding.btnRemoveImg.isVisible = true
                 }
             }
         }
