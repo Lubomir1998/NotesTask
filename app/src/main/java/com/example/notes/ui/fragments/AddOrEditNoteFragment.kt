@@ -134,7 +134,7 @@ class AddOrEditNoteFragment: Fragment(R.layout.add_or_edit_note_fragment) {
                 type = "image/*"
             }, null)
             startActivity(share)
-        } ?: snackbar("No image")
+        } ?: snackbar(R.string.no_image_msg)
 
     }
 
@@ -144,7 +144,7 @@ class AddOrEditNoteFragment: Fragment(R.layout.add_or_edit_note_fragment) {
                 when(state) {
                     is SaveNoteState.Success -> {
                         findNavController().navigate(R.id.action_addOrEditNoteFragment_to_homeScreenFragment)
-                        snackbar("Note saved")
+                        snackbar(R.string.note_saved)
                     }
 
                     is SaveNoteState.Error -> {

@@ -1,3 +1,15 @@
 <resources>
     <string name="app_name">Notes</string>
+    <string name="note_saved">Note saved</string>
+    <string name="no_image_msg">No image</string>
+    <string name="note_deleted">Note deleted</string>
+    <string name="undo">Undo</string>
+    <string name="no_notes">No notes</string>
+    <string name="title">Title</string>
+    <string name="content">Content</string>
+    <string name="loading_notes">Loading notes</string>
+    <string name="notes">Notes</string>
+    <string name="note">Note</string>
+    <string name="done">Done</string>
+    <string name="search">Search</string>
 </resources>

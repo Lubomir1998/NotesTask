@@ -141,7 +141,7 @@ class HomeScreenFragment: Fragment(R.layout.home_screen_fragment) {
                             progressBar.isVisible = true
                             rvNotes.isVisible = false
                             tvNoNotes.isVisible = false
-                            tvAllNotes.text = "Loading..."
+                            tvAllNotes.text = "${R.string.loading_notes}..."
                         }
                     }
 
@@ -164,7 +164,7 @@ class HomeScreenFragment: Fragment(R.layout.home_screen_fragment) {
                             tvNoNotes.isVisible = state.notes.isEmpty()
                             rvNotes.isVisible = state.notes.isNotEmpty()
                         }
-                        snackbar("Note saved")
+                        snackbar(R.string.note_saved)
                     }
 
                     is SaveNoteState.Error -> {
@@ -190,8 +190,8 @@ class HomeScreenFragment: Fragment(R.layout.home_screen_fragment) {
                             rvNotes.isVisible = state.notes.isNotEmpty()
                         }
 
-                        Snackbar.make(requireView(), "Note deleted", Snackbar.LENGTH_LONG)
-                            .setAction("Undo") {
+                        Snackbar.make(requireView(), resources.getString(R.string.note_deleted), Snackbar.LENGTH_LONG)
+                            .setAction(resources.getString(R.string.undo)) {
                                 viewModel.saveNote(state.note)
                             }
                             .show()
@@ -210,9 +210,9 @@ class HomeScreenFragment: Fragment(R.layout.home_screen_fragment) {
 
     private fun setBottomViewText(listSize: Int): String {
         return when (listSize) {
-            0 -> "No notes"
-            1 -> "1 Note"
-            else -> "$listSize Notes"
+            0 -> resources.getString(R.string.no_notes)
+            1 -> "1 ${resources.getString(R.string.note)}"
+            else -> "$listSize ${resources.getString(R.string.notes)}"
         }
     }
 
