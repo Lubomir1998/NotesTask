@@ -3,10 +3,12 @@ package com.example.notes.ui.fragments
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.net.toUri
 import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
@@ -26,6 +28,8 @@ import kotlinx.coroutines.flow.collect
 import java.util.*
 
 
+private const val TAG = "AddOrEditNoteFragment"
+
 @AndroidEntryPoint
 class AddOrEditNoteFragment: Fragment(R.layout.add_or_edit_note_fragment) {
 
@@ -44,6 +48,11 @@ class AddOrEditNoteFragment: Fragment(R.layout.add_or_edit_note_fragment) {
 
         getContent = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri: Uri? ->
             uri?.let {
+                val contentResolver = requireActivity().contentResolver
+                val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION or
+                        Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+
+                contentResolver.takePersistableUriPermission(it, takeFlags)
                 viewModel.setImgUri(it)
             }
         }
@@ -55,24 +64,20 @@ class AddOrEditNoteFragment: Fragment(R.layout.add_or_edit_note_fragment) {
         _binding = AddOrEditNoteFragmentBinding.bind(view)
 
 
-        setTextFields(args.title, args.text)
         setCurrentNote()
+        setTextFields(args.title, args.text)
+        setImageVisibility(args.imgUri)
 
-        args.imgUri?.let {
-            currentUri = Uri.parse(it)
-            binding.ivNoteImage.setImageURI(currentUri)
-        }
-
+        collectImgUri()
         collectSaveNoteStatus()
+        collectUpdateNoteImageStatus()
+
 
         binding.btnSave.isVisible = binding.etTitle.text.trim().toString().isNotEmpty()
 
-        binding.ivNoteImage.isVisible = currentUri != null
-        binding.btnRemoveImg.isVisible = currentUri != null
-
 
         binding.btnRemoveImg.setOnClickListener {
-            currentUri = null
+            viewModel.setImgUri("".toUri())
             binding.ivNoteImage.isVisible = false
             binding.btnRemoveImg.isVisible = false
         }
@@ -82,32 +87,12 @@ class AddOrEditNoteFragment: Fragment(R.layout.add_or_edit_note_fragment) {
         }
 
         binding.btnSave.setOnClickListener {
-            requireActivity().hideKeyboard(requireView())
-            val title = binding.etTitle.text.trim().toString()
-            val text = binding.etText.text.trim().toString()
-
-            val timestamp = if(args.date != 0L) {
-                args.date
-            } else {
-                System.currentTimeMillis()
-            }
-
-            val id = if(args.id.isNotEmpty()) {
-                args.id
-            } else {
-                UUID.randomUUID().toString()
-            }
-
-
-            val note = Note(title, text, timestamp, currentUri?.toString(), id = id)
-            viewModel.saveNote(title, note)
+            saveNote()
         }
 
         binding.btnChoosePic.setOnClickListener {
             getContent.launch(arrayOf("image/*"))
         }
-
-        collectImgUri()
 
         binding.btnShare.setOnClickListener {
             shareNoteImage()
@@ -116,6 +101,7 @@ class AddOrEditNoteFragment: Fragment(R.layout.add_or_edit_note_fragment) {
 
         requireActivity().onBackPressedDispatcher.addCallback(object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
+                saveNote()
                 findNavController().navigate(R.id.action_addOrEditNoteFragment_to_homeScreenFragment)
             }
         })
@@ -124,6 +110,26 @@ class AddOrEditNoteFragment: Fragment(R.layout.add_or_edit_note_fragment) {
 
 
 
+    private fun saveNote() {
+        requireActivity().hideKeyboard(requireView())
+        val title = binding.etTitle.text.trim().toString()
+        val text = binding.etText.text.trim().toString()
+
+        val timestamp = if(args.date != 0L) {
+            args.date
+        } else {
+            System.currentTimeMillis()
+        }
+
+        val id = if(args.id.isNotEmpty()) {
+            args.id
+        } else {
+            UUID.randomUUID().toString()
+        }
+
+        val note = Note(title, text, timestamp, currentUri?.toString(), id = id)
+        viewModel.saveNote(title, note)
+    }
 
     private fun shareNoteImage() {
         currentUri?.let { uri ->
@@ -143,6 +149,7 @@ class AddOrEditNoteFragment: Fragment(R.layout.add_or_edit_note_fragment) {
             viewModel.saveNoteStatus.collect { state ->
                 when(state) {
                     is SaveNoteState.Success -> {
+                        currentNote = state.note
                         findNavController().navigate(R.id.action_addOrEditNoteFragment_to_homeScreenFragment)
                         snackbar(R.string.note_saved)
                     }
@@ -158,15 +165,45 @@ class AddOrEditNoteFragment: Fragment(R.layout.add_or_edit_note_fragment) {
     }
 
     private fun collectImgUri() {
+        viewModel.imgUri.observe(viewLifecycleOwner) { uri ->
+            currentUri = if(uri.toString().isNotEmpty()) {
+                uri
+            } else {
+                null
+            }
+
+            setImageVisibility(if (currentUri.toString().isEmpty()) null else currentUri.toString())
+
+            currentNote?.let { note ->
+                note.imgUri = if (currentUri.toString().isEmpty()) {
+                    null
+                } else {
+                    currentUri.toString()
+                }
+                if(binding.etTitle.text.toString().isNotEmpty()) {
+                    viewModel.updateNotesImage(note)
+                }
+            }
+
+
+        }
+
+    }
+
+    private fun collectUpdateNoteImageStatus() {
         lifecycleScope.launchWhenStarted {
-            viewModel.imgUri.collect {
-                it?.let { uri ->
-                    currentUri = uri
-                    binding.ivNoteImage.apply {
-                        isVisible = true
-                        setImageURI(currentUri!!)
+            viewModel.updateNoteImageStatus.collect { state ->
+                when(state) {
+                    is AddOrEditViewModel.UpdateNoteImageState.Success -> {
+                        currentNote = state.note
+
                     }
-                    binding.btnRemoveImg.isVisible = true
+
+                    is AddOrEditViewModel.UpdateNoteImageState.Error -> {
+                        snackbar(state.message)
+                    }
+
+                    else -> Unit
                 }
             }
         }
@@ -179,11 +216,27 @@ class AddOrEditNoteFragment: Fragment(R.layout.add_or_edit_note_fragment) {
         }
     }
 
+    private fun setImageVisibility(uri: String?) {
+        binding.apply {
+            ivNoteImage.isVisible = uri != null
+            btnRemoveImg.isVisible = uri != null
+        }
+        uri?.let {
+            binding.ivNoteImage.setImageURI(Uri.parse(it))
+        }
+    }
+
     private fun setCurrentNote() {
         if(args.id.isNotEmpty()) {
             currentNote = Note(args.title, args.text ?: "", args.date, args.imgUri, args.id)
+            args.imgUri?.let {
+                currentUri = Uri.parse(it)
+                setImageVisibility(it)
+            }
         }
+
     }
+
 
 
     override fun onDestroy() {

@@ -6,10 +6,10 @@ import java.util.*
 
 @Entity
 data class Note(
-    val title: String,
-    val text: String,
-    val timestamp: Long,
-    val imgUri: String? = null,
-    @PrimaryKey
+        val title: String,
+        val text: String,
+        val timestamp: Long,
+        var imgUri: String? = null,
+        @PrimaryKey
     val id: String = UUID.randomUUID().toString()
 )

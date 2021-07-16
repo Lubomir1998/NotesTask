@@ -1,10 +1,13 @@
 package com.example.notes.ui.viewmodels
 
 import android.net.Uri
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.notes.db.models.Note
 import com.example.notes.repositories.NoteRepository
+import com.example.notes.util.Event
 import com.example.notes.util.SaveNoteState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
@@ -20,6 +23,15 @@ class AddOrEditViewModel @Inject constructor(
     private val dispatcher: CoroutineDispatcher = Dispatchers.Main
 ): ViewModel() {
 
+
+    sealed class UpdateNoteImageState {
+        data class Success(val note: Note): UpdateNoteImageState()
+        data class Error(val message: String = "Something went wrong"): UpdateNoteImageState()
+        object Loading: UpdateNoteImageState()
+        object Empty: UpdateNoteImageState()
+    }
+
+
     private val _saveNoteStatus = MutableStateFlow<SaveNoteState>(SaveNoteState.Empty)
     val saveNoteStatus: StateFlow<SaveNoteState> = _saveNoteStatus
 
@@ -32,16 +44,28 @@ class AddOrEditViewModel @Inject constructor(
         }
         viewModelScope.launch(dispatcher) {
             repository.saveNote(note)
-            _saveNoteStatus.value = SaveNoteState.Success()
+            _saveNoteStatus.value = SaveNoteState.Success(note = note)
         }
     }
 
 
-    private val _imgUri: MutableStateFlow<Uri?> = MutableStateFlow(null)
-    val imgUri: StateFlow<Uri?> = _imgUri
+    private val _updateNoteImageStatus = MutableStateFlow<UpdateNoteImageState>(UpdateNoteImageState.Empty)
+    val updateNoteImageStatus: StateFlow<UpdateNoteImageState> = _updateNoteImageStatus
+
+    fun updateNotesImage(note: Note) {
+        _updateNoteImageStatus.value = UpdateNoteImageState.Loading
+        viewModelScope.launch(dispatcher) {
+            repository.saveNote(note)
+            _updateNoteImageStatus.value = UpdateNoteImageState.Success(note)
+        }
+    }
+
+
+    private val _imgUri: MutableLiveData<Uri> = MutableLiveData()
+    val imgUri: LiveData<Uri> = _imgUri
 
     fun setImgUri(uri: Uri) {
-        _imgUri.value = uri
+        _imgUri.postValue(uri)
     }
 
 

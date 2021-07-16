@@ -42,7 +42,7 @@ class HomeScreenViewModel @Inject constructor(
         _saveNoteStatus.value = SaveNoteState.Loading
         viewModelScope.launch(dispatcher) {
             repository.saveNote(note)
-            _saveNoteStatus.value = SaveNoteState.Success(repository.getNotes())
+            _saveNoteStatus.value = SaveNoteState.Success(repository.getNotes(), note)
         }
     }
 
