@@ -1,7 +1,9 @@
 package com.example.notes.ui.viewmodels
 
+import android.content.res.Resources
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.notes.R
 import com.example.notes.db.models.Note
 import com.example.notes.repositories.NoteRepository
 import com.example.notes.util.SaveNoteState
@@ -73,7 +75,7 @@ class HomeScreenViewModel @Inject constructor(
 
     sealed class DeleteNoteState {
         data class Success(val note: Note, val notes: List<Note>): DeleteNoteState()
-        data class Error(val message: String = "Something went wrong"): DeleteNoteState()
+        data class Error(val message: String = Resources.getSystem().getString(R.string.something_went_wrong)): DeleteNoteState()
         object Loading: DeleteNoteState()
     }
 

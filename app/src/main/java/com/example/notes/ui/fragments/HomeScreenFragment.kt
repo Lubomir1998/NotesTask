@@ -86,12 +86,25 @@ class HomeScreenFragment: Fragment(R.layout.home_screen_fragment) {
 
 
 
-        requireActivity().onBackPressedDispatcher.addCallback(object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                requireActivity().finish()
-            }
-        })
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, callback)
 
+    }
+
+    // the callback is alive as long as the fragment is alive
+    private val callback = object : OnBackPressedCallback(false) {
+        override fun handleOnBackPressed() {
+            requireActivity().finish()
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        callback.isEnabled = false
+    }
+
+    override fun onResume() {
+        super.onResume()
+        callback.isEnabled = true
     }
 
 

@@ -3,7 +3,6 @@ package com.example.notes.ui.fragments
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.ActivityResultLauncher
@@ -27,8 +26,6 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
 import java.util.*
 
-
-private const val TAG = "AddOrEditNoteFragment"
 
 @AndroidEntryPoint
 class AddOrEditNoteFragment: Fragment(R.layout.add_or_edit_note_fragment) {
@@ -99,13 +96,26 @@ class AddOrEditNoteFragment: Fragment(R.layout.add_or_edit_note_fragment) {
         }
 
 
-        requireActivity().onBackPressedDispatcher.addCallback(object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                saveNote()
-                findNavController().navigate(R.id.action_addOrEditNoteFragment_to_homeScreenFragment)
-            }
-        })
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, callback)
 
+    }
+
+    // the callback is alive as long as the fragment is alive
+    private val callback = object : OnBackPressedCallback(false) {
+        override fun handleOnBackPressed() {
+            saveNote()
+            findNavController().navigate(R.id.action_addOrEditNoteFragment_to_homeScreenFragment)
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        callback.isEnabled = false
+    }
+
+    override fun onResume() {
+        super.onResume()
+        callback.isEnabled = true
     }
 
 
@@ -127,7 +137,13 @@ class AddOrEditNoteFragment: Fragment(R.layout.add_or_edit_note_fragment) {
             UUID.randomUUID().toString()
         }
 
-        val note = Note(title, text, timestamp, currentUri?.toString(), id = id)
+        val imgUri = if(currentUri != null && currentUri.toString().isNotEmpty()) {
+            currentUri.toString()
+        } else {
+            null
+        }
+
+        val note = Note(title, text, timestamp, imgUri, id = id)
         viewModel.saveNote(title, note)
     }
 
@@ -172,10 +188,12 @@ class AddOrEditNoteFragment: Fragment(R.layout.add_or_edit_note_fragment) {
                 null
             }
 
-            setImageVisibility(if (currentUri.toString().isEmpty()) null else currentUri.toString())
+            setImageVisibility(currentUri?.toString())
 
+            // when the image is changed or removed
+            // it automatically updates the Note object
             currentNote?.let { note ->
-                note.imgUri = if (currentUri.toString().isEmpty()) {
+                note.imgUri = if(currentUri == null) {
                     null
                 } else {
                     currentUri.toString()
@@ -196,7 +214,6 @@ class AddOrEditNoteFragment: Fragment(R.layout.add_or_edit_note_fragment) {
                 when(state) {
                     is AddOrEditViewModel.UpdateNoteImageState.Success -> {
                         currentNote = state.note
-
                     }
 
                     is AddOrEditViewModel.UpdateNoteImageState.Error -> {
@@ -218,8 +235,8 @@ class AddOrEditNoteFragment: Fragment(R.layout.add_or_edit_note_fragment) {
 
     private fun setImageVisibility(uri: String?) {
         binding.apply {
-            ivNoteImage.isVisible = uri != null
-            btnRemoveImg.isVisible = uri != null
+            ivNoteImage.isVisible = uri != null && uri.isNotEmpty()
+            btnRemoveImg.isVisible = uri != null && uri.isNotEmpty()
         }
         uri?.let {
             binding.ivNoteImage.setImageURI(Uri.parse(it))

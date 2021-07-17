@@ -20,6 +20,11 @@ import javax.inject.Singleton
 object AppModule {
 
 
+    @Singleton
+    @Provides
+    fun provideApplicationContext(
+            @ApplicationContext context: Context
+    ) = context
 
     @Singleton
     @Provides
