@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.View
 import android.view.WindowManager
+import android.view.inputmethod.EditorInfo
 import androidx.activity.OnBackPressedCallback
 import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
@@ -20,6 +21,7 @@ import com.example.notes.databinding.HomeScreenFragmentBinding
 import com.example.notes.ui.viewmodels.HomeScreenViewModel
 import com.example.notes.util.Constants.SEARCH_DELAY
 import com.example.notes.util.SaveNoteState
+import com.example.notes.util.hideKeyboard
 import com.example.notes.util.snackbar
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
@@ -57,6 +59,15 @@ class HomeScreenFragment: Fragment(R.layout.home_screen_fragment) {
             searchJob = lifecycleScope.launch {
                 delay(SEARCH_DELAY)
                 viewModel.searchNotes(it.toString())
+            }
+        }
+        
+        binding.etSearchNote.setOnEditorActionListener { _, actionId, _ ->
+            if(actionId == EditorInfo.IME_ACTION_SEARCH) {
+                requireActivity().hideKeyboard(requireView())
+                true
+            } else {
+                false
             }
         }
 
