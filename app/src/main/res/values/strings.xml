@@ -5,6 +5,7 @@
     <string name="note_deleted">Note deleted</string>
     <string name="undo">Undo</string>
     <string name="no_notes">No notes</string>
+    <string name="no_note">No note</string>
     <string name="title">Title</string>
     <string name="content">Content</string>
     <string name="loading_notes">Loading notes</string>
@@ -14,4 +15,6 @@
     <string name="search">Search</string>
     <string name="empty_title">Empty title</string>
     <string name="something_went_wrong">Something went wrong</string>
+    <string name="permission_granted">Permission granted</string>
+    <string name="permission_denied">Permission denied</string>
 </resources>
